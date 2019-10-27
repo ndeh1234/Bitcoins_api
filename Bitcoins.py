@@ -1,45 +1,26 @@
-from decimal import Decimal
 
-import json
-import urllib.request
-
+import requests
 
 def main():
-    get_price_of_bitcoins()
+    users_number_of_bitcoin = float(input('How many bitcoin do you have?: '))
+    bitcoin_to_dollars_rate = api()
+    USD = convert(users_number_of_bitcoin, bitcoin_to_dollars_rate)
+    display(USD)
 
-def get_price_of_bitcoins():
-    # getting number of bit coins from the user
-    bitcoin = int(input('Enter the number of bitcoins: '))
 
-    try:
+def api():
+    bitcoin_current_price = requests.get('https://api.coindesk.com/v1/bpi/currentprice.json').json()
+    rate = bitcoin_current_price['bpi']['USD']['rate_float']
+    return rate
 
-        # url for retrieving the bitcoin price
-        url = 'https://api.coindesk.com/v1/bpi/currentprice/CNY.json'
 
-        # getting response from the url
-        r = urllib.request.urlopen(url)
+def convert(number_of_bitcoin, rate):
+    USD = rate * number_of_bitcoin
+    return USD
 
-        # reading the data
-        raw_data = r.read()
 
-        # decoding the data to json data type
-        data = json.loads(raw_data.decode(r.info().get_param('charset') or 'utf-8'))
-
-        # getting the US dollar price of one bitcoin from json data
-        bitcoin_price = data['bpi']['USD']['rate_float']
-
-        # calculating the US price for n bitcoins
-        total = bitcoin * bitcoin_price
-
-        # displaying the total cost
-        print('\nThe price of {0:d} bitcoin(s) is ${1:.2f}'.format(bitcoin, total))
-
-    except urllib.error.URLError as e:
-
-        # error message, when connectivity fails
-        print(e.reason)
-
-        # return bitcoin_price
+def display(USD):
+    print('Your bitcoin is worth ${:.2f}'.format(USD))
 
 
 if __name__ == '__main__':
